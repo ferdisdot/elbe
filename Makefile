@@ -1,3 +1,3 @@
 all:
-	dpkg-buildpackage --source-option="-I .git"
+	dpkg-buildpackage -uc -us -b
 	lintian

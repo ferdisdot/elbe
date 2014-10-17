@@ -33,7 +33,7 @@ class InChRootObject(object):
         self.finalizer = Finalize(self,self.rfs.leave_chroot,exitpriority=10)
 
 class RPCAPTCache(InChRootObject):
-    def __init__( self, rfs, logpath, arch, notifier=None, norecommend = False, noauth = True ):
+    def __init__( self, rfs, logpath, arch, notifier=None, norecommend = False, noauth = True, ignorevaliduntil = False ):
         self.log = ASCIIDocLog(logpath)
         self.notifier = notifier
         InChRootObject.__init__(self, rfs)
@@ -47,6 +47,11 @@ class RPCAPTCache(InChRootObject):
             config.set ("APT::Get::AllowUnauthenticated", "1")
         else:
             config.set ("APT::Get::AllowUnauthenticated", "0")
+
+        if ignorevaliduntil:
+            config.set ("Acquire::Check-Valid-Until", "false")
+        else:
+            config.set ("Acquire::Check-Valid-Until", "true")
 
         self.cache = Cache()
         self.cache.open()
@@ -178,8 +183,8 @@ class MyMan(BaseManager):
 
 MyMan.register( "RPCAPTCache", RPCAPTCache )
 
-def get_rpcaptcache(rfs, logpath, arch, notifier=None):
+def get_rpcaptcache(rfs, logpath, arch, notifier=None, ignorevaliduntil = False):
     mm = MyMan()
     mm.start()
 
-    return mm.RPCAPTCache(rfs, logpath, arch, notifier)
+    return mm.RPCAPTCache(rfs, logpath, arch, notifier, ignorevaliduntil)

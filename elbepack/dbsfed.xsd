@@ -368,6 +368,14 @@
           </documentation>
         </annotation>
       </element>
+      <element name="ignore-valid-until" type="string" minOccurs="0">
+        <annotation>
+          <documentation>
+            ignore the valid until header within release files.
+            This is required for example to use the snaphsot.debian.net mirror.
+          </documentation>
+        </annotation>
+      </element>
       <element name="preference" type="rfs:preference" minOccurs="0">
         <annotation>
           <documentation>
