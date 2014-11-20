@@ -79,6 +79,9 @@ d-i mirror/http/directory string ${prj.text("mirror/primary_path")}
 d-i mirror/http/proxy string ${http_proxy}
 d-i mirror/protocol string ${prj.text("mirror/primary_proto")}
 %endif
+%if prj.has("suite"):
+d-i mirror/suite            string ${prj.text("suite")}
+%endif
 
 <% i=0 %>
 % if prj.node("mirror/url-list"):
