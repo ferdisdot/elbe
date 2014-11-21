@@ -1,3 +1,9 @@
+elbe (2:0.1.1) unstable; urgency=medium
+
+  * remove newlines from etc/apt/preferences to stop confusing apt
+
+ -- Manuel Traut <manut@linutronix.de>  Thu, 30 Oct 2014 12:14:59 +0100
+
 elbe (0.9.5.1) unstable; urgency=medium
 
   * improve documentation and man-pages
