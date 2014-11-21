@@ -37,6 +37,7 @@ from elbepack.dump import dump_debootstrappkgs, dump_initvmpkgs, dump_fullpkgs
 from elbepack.dump import check_full_pkgs
 
 from elbepack.cdroms import mk_source_cdrom, mk_binary_cdrom
+from elbepack.logginghandlers import SQLiteHandler
 
 class IncompatibeArchitectureException(Exception):
     def __init__ (self, oldarch, newarch):
@@ -95,6 +96,8 @@ class ElbeProject (object):
             import logging.handlers
             filehandler = logging.handlers.RotatingFileHandler(logpath + '.logging')
             rootlogger.addHandler(filehandler)
+            sqlitehandler = SQLiteHandler(os.path.splitext(logpath)[0] + '.db')
+            rootlogger.addHandler(sqlitehandler)
         else:
             self.log = StdoutLog()
 
