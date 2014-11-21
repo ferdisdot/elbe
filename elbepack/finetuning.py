@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with ELBE.  If not, see <http://www.gnu.org/licenses/>.
 
+from elbepack.shellhelper import CommandError, command_out
 import os
 import gpgme
 
@@ -53,7 +54,7 @@ class RmAction(FinetuningAction):
         FinetuningAction.__init__(self, node)
 
     def execute(self, log, buildenv, target):
-        log.do( "rm -rvf " + target.fname( self.node.et.text ) )
+        command_out( "rm -rvf " + target.fname( self.node.et.text ) )
 
 FinetuningAction.register( RmAction )
 
@@ -66,7 +67,7 @@ class MkdirAction(FinetuningAction):
         FinetuningAction.__init__(self, node)
 
     def execute(self, log, buildenv, target):
-        log.do( "mkdir -p " + target.fname( self.node.et.text ) )
+        command_out( "mkdir -p " + target.fname( self.node.et.text ) )
 
 FinetuningAction.register( MkdirAction )
 
@@ -78,7 +79,7 @@ class MknodAction(FinetuningAction):
         FinetuningAction.__init__(self, node)
 
     def execute(self, log, buildenv, target):
-        log.do( "mknod " + target.fname( self.node.et.text ) + " " + self.node.et.attrib['opts'] )
+        command_out( "mknod " + target.fname( self.node.et.text ) + " " + self.node.et.attrib['opts'] )
 
 FinetuningAction.register( MknodAction )
 
@@ -90,7 +91,7 @@ class BuildenvMkdirAction(FinetuningAction):
         FinetuningAction.__init__(self, node)
 
     def execute(self, log, buildenv, target):
-        log.do( "mkdir -p " + buildenv.rfs.fname( self.node.et.text ) )
+        command_out( "mkdir -p " + buildenv.rfs.fname( self.node.et.text ) )
 
 FinetuningAction.register( BuildenvMkdirAction )
 
@@ -103,7 +104,7 @@ class CpAction(FinetuningAction):
         FinetuningAction.__init__(self, node)
 
     def execute(self, log, buildenv, target):
-        log.do( "cp -av " + target.fname( self.node.et.attrib['path'] ) + " " + target.fname( self.node.et.text ) )
+        command_out( "cp -av " + target.fname( self.node.et.attrib['path'] ) + " " + target.fname( self.node.et.text ) )
 
 FinetuningAction.register( CpAction )
 
@@ -115,7 +116,7 @@ class BuildenvCpAction(FinetuningAction):
         FinetuningAction.__init__(self, node)
 
     def execute(self, log, buildenv, target):
-        log.do( "cp -av " + buildenv.rfs.fname( self.node.et.attrib['path'] ) + " " + buildenv.rfs.fname( self.node.et.text ) )
+        command_out( "cp -av " + buildenv.rfs.fname( self.node.et.attrib['path'] ) + " " + buildenv.rfs.fname( self.node.et.text ) )
 
 FinetuningAction.register( BuildenvCpAction )
 
@@ -127,7 +128,7 @@ class B2TCpAction(FinetuningAction):
         FinetuningAction.__init__(self, node)
 
     def execute(self, log, buildenv, target):
-        log.do( "cp -av " + buildenv.rfs.fname( self.node.et.attrib['path'] ) + " " + target.fname( self.node.et.text ) )
+        command_out( "cp -av " + buildenv.rfs.fname( self.node.et.attrib['path'] ) + " " + target.fname( self.node.et.text ) )
 
 FinetuningAction.register( B2TCpAction )
 
@@ -139,7 +140,7 @@ class T2BCpAction(FinetuningAction):
         FinetuningAction.__init__(self, node)
 
     def execute(self, log, buildenv, target):
-        log.do( "cp -av " + target.fname( self.node.et.attrib['path'] ) + " " + buildenv.rfs.fname( self.node.et.text ) )
+        command_out( "cp -av " + target.fname( self.node.et.attrib['path'] ) + " " + buildenv.rfs.fname( self.node.et.text ) )
 
 FinetuningAction.register( T2BCpAction )
 
@@ -151,7 +152,7 @@ class MvAction(FinetuningAction):
         FinetuningAction.__init__(self, node)
 
     def execute(self, log, buildenv, target):
-        log.do( "mv -v " + target.fname( self.node.et.attrib['path'] ) + " " + target.fname( self.node.et.text ) )
+        command_out( "mv -v " + target.fname( self.node.et.attrib['path'] ) + " " + target.fname( self.node.et.text ) )
 
 FinetuningAction.register( MvAction )
 
@@ -178,7 +179,7 @@ class BuildenvMvAction(FinetuningAction):
         FinetuningAction.__init__(self, node)
 
     def execute(self, log, buildenv, target):
-        log.do( "mv -v " + buildenv.rfs.fname( self.node.et.attrib['path'] ) + " " + buildenv.rfs.fname( self.node.et.text ) )
+        command_out( "mv -v " + buildenv.rfs.fname( self.node.et.attrib['path'] ) + " " + buildenv.rfs.fname( self.node.et.text ) )
 
 FinetuningAction.register( BuildenvMvAction )
 

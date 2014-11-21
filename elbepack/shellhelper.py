@@ -18,6 +18,23 @@
 
 import os
 from subprocess import Popen, PIPE, STDOUT
+import logging
+
+log_cmd_msg = """CMD: %(cmd)s
+%(sep)s
+IN:
+%(stdin)s
+%(sep)s
+OUT:
+%(stdout)s
+%(sep)s
+ERR:
+%(stderr)s
+%(sep)s
+RET: %(retval)i
+"""
+sep = '-'*80
+
 
 class CommandError(Exception):
     def __init__(self, cmd, returncode):
@@ -38,12 +55,18 @@ def system(cmd, allow_fail=False):
 
 
 def command_out(cmd, input=None):
+    log = logging.getLogger(__name__)
+    log.debug("Execute command '%(cmd)s'", dict(cmd=cmd))
     if input is None:
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT )
         output, stderr = p.communicate()
     else:
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, stdin=PIPE)
         output, stderr = p.communicate(input=input)
+    if p.returncode == 0:
+        log.info(log_cmd_msg, dict(sep=sep, cmd=cmd, retval=p.returncode, stdin=input, stdout=output, stderr=stderr))
+    else:
+        log.error(log_cmd_msg, dict(sep=sep, cmd=cmd, retval=p.returncode, stdin=input, stdout=output, stderr=stderr))
 
     return p.returncode, output
 
@@ -57,12 +80,18 @@ def system_out(cmd, input=None, allow_fail=False):
     return out
 
 def command_out_stderr(cmd, input=None):
+    log = logging.getLogger(__name__)
+    log.debug("Execute command '%(cmd)s'", dict(cmd=cmd))
     if input is None:
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE )
         output, stderr = p.communicate()
     else:
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, stdin=PIPE)
         output, stderr = p.communicate(input=input)
+    if p.returncode == 0:
+        log.info(log_cmd_msg, dict(sep=sep, cmd=cmd, retval=p.returncode, stdin=input, stdout=output, stderr=stderr))
+    else:
+        log.error(log_cmd_msg, dict(sep=sep, cmd=cmd, retval=p.returncode, stdin=input, stdout=output, stderr=stderr))
 
     return p.returncode, output, stderr
 

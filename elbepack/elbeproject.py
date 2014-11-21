@@ -21,6 +21,10 @@
 import os
 import datetime
 
+import logging
+
+from elbepack.shellhelper import CommandError, command_out
+
 from elbepack.asciidoclog import ASCIIDocLog, StdoutLog
 from elbepack.elbexml import ElbeXML, NoInitvmNode, ValidationError
 from elbepack.rfs import BuildEnv
@@ -80,8 +84,17 @@ class ElbeProject (object):
 
         # If logpath is given, use an AsciiDocLog instance, otherwise log
         # to stdout
+        import logging
+        rootlogger = logging.getLogger()
+        rootlogger.setLevel(0)
+        rootlogger.addHandler(logging.StreamHandler())
+
         if logpath:
             self.log = ASCIIDocLog( logpath )
+
+            import logging.handlers
+            filehandler = logging.handlers.RotatingFileHandler(logpath + '.logging')
+            rootlogger.addHandler(filehandler)
         else:
             self.log = StdoutLog()
 
@@ -103,11 +116,14 @@ class ElbeProject (object):
 
     def build (self, skip_debootstrap = False, build_bin = False,
             build_sources = False, cdrom_size = None, debug = False, skip_pkglist = False):
+        logger = logging.getLogger(__name__)
         # Write the log header
         self.write_log_header()
+        logger.info("Starting Build")
 
         # Create the build environment, if it does not exist yet
         if not self.buildenv:
+            logger.debug("Creating Buildenv")
             self.log.do( 'mkdir -p "%s"' % self.chrootpath )
             self.buildenv = BuildEnv( self.xml, self.log, self.chrootpath )
             skip_pkglist = False
@@ -120,9 +136,11 @@ class ElbeProject (object):
             self.buildenv.rfs.dump_elbeversion (self.xml)
         except IOError:
             self.log.printo ("dump elbeversion failed")
+            logger.error("dump elbeversion failed")
 
         # Extract target FS. We always create a new instance here with
         # clean=true, because we want a pristine directory.
+        logger.info("Extract target FS")
         self.targetfs = TargetFs( self.targetpath, self.log,
                 self.buildenv.xml, clean=True )
         os.chdir( self.buildenv.rfs.fname( '' ) )
@@ -131,6 +149,7 @@ class ElbeProject (object):
 
         # Package validation and package list
         if not skip_pkglist:
+            logger.info("Package validation")
             validationpath = os.path.join( self.builddir, "validation.txt" )
             pkgs = self.xml.xml.node( "/target/pkg-list" )
             if self.xml.has( "fullpkgs" ):
@@ -150,9 +169,11 @@ class ElbeProject (object):
             self.targetfs.dump_elbeversion( self.xml )
         except MemoryError:
             self.log.printo( "dump elbeversion failed" )
+            logger.error("dump elbeversion failed")
 
         # install packages for buildenv
         if not skip_pkglist:
+            logger.info("install packages for buildenv")
             self.install_packages(buildenv=True)
 
         # Write source.xml
@@ -173,6 +194,7 @@ class ElbeProject (object):
         f.close()
 
         # Generate images
+        logger.info("Generate images")
         if self.get_rpcaptcache().is_installed( 'grub-pc' ):
             grub_version = 2
 
@@ -180,6 +202,7 @@ class ElbeProject (object):
             grub_version = 1
         else:
             self.log.printo( "package grub-pc is not installed, skipping grub" )
+            logger.info("package grub-pc is not installed, skipping grub")
             # version 0 == skip_grub
             grub_version = 0
         self.targetfs.part_target( self.builddir, grub_version )
@@ -212,15 +235,16 @@ class ElbeProject (object):
                 except SystemError as e:
                     # e.g. no deb-src urls specified
                     self.log.printo( str (e) )
+                    logger.exception( str (e) )
 
 
         if self.postbuild_file:
             self.log.h2 ("postbuild script:")
-            self.log.do (self.postbuild_file + ' "%s %s %s"' % (
+            logger.info("postbuild script:")
+            command_out (self.postbuild_file + ' "%s %s %s"' % (
                             self.builddir,
                             self.xml.text ("project/version"),
-                            self.xml.text ("project/name")),
-                         allow_fail=True)
+                            self.xml.text ("project/name")))
 
         os.system( 'cat "%s"' % os.path.join( self.builddir, "validation.txt" ) )
 
