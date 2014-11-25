@@ -333,8 +333,10 @@ class ElbeProject (object):
             # First update the apt cache
             try:
                 self.get_rpcaptcache().update()
-            except:
+            except Exception as e:
                 logger = logging.getLogger(__name__)
+                logger.debug(repr(e))
+                logger.debug(e.__dict__)
                 logger.exception('update cache failed.')
                 self.log.printo( "update cache failed" )
 
