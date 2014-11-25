@@ -80,8 +80,10 @@ def dump_initvmpkgs (xml):
 
 def check_full_pkgs(pkgs, fullpkgs, errorname, cache):
     elog = ASCIIDocLog(errorname)
+    logger = logging.getLogger(__name__)
 
     elog.h1("ELBE Package validation")
+    logger.info("ELBE Package validation")
     elog.h2("Package List validation")
 
     errors = 0
@@ -90,16 +92,22 @@ def check_full_pkgs(pkgs, fullpkgs, errorname, cache):
 
         nomulti_name = name.split(":")[0]
         if not cache.has_pkg(nomulti_name):
+            logger.error("Package List validation:\n"
+                         "package %s does not exist" % nomulti_name)
             elog.printo( "- package %s does not exist" % nomulti_name )
             errors += 1
             continue
 
         if not cache.is_installed(nomulti_name):
+            logger.error("Package List validation:\n"
+                         "package %s is not installed" % nomulti_name)
             elog.printo( "- package %s is not installed" % nomulti_name )
             errors += 1
             continue
 
     if errors == 0:
+        logger.info("Package List validation:\n"
+                    "No Error found")
         elog.printo( "No Errors found" )
 
     if not fullpkgs:
@@ -117,11 +125,15 @@ def check_full_pkgs(pkgs, fullpkgs, errorname, cache):
         pindex[name] = p
 
         if not cache.has_pkg(name):
+            logger.error("Full Package List validation:\n"
+                         "package %s does not exist" % name)
             elog.printo( "- package %s does not exist" % name )
             errors += 1
             continue
 
         if not cache.is_installed(name):
+            logger.error("Full Package List validation:\n"
+                         "package %s is not installed" % name)
             elog.printo( "- package %s is not installed" % name )
             errors += 1
             continue
@@ -129,21 +141,32 @@ def check_full_pkgs(pkgs, fullpkgs, errorname, cache):
         pkg = cache.get_pkg(name)
 
         if pkg.installed_version != ver:
+            logger.error("Full Package List validation:\n"
+                         "package %s version %s does not match installed"
+                         " version %s" % (name, ver, pkg.installed_version))
             elog.printo( "- package %s version %s does not match installed version %s" % (name, ver,  pkg.installed_version) )
             errors += 1
             continue
 
         if pkg.installed_md5 != md5:
+            logger.error("Full Package List validation:\n"
+                         "package %s md5 %s does not match installed md5 %s" %
+                         (name, md5,  pkg.installed_md5))
             elog.printo( "- package %s md5 %s does not match installed md5 %s" %
               (name, md5,  pkg.installed_md5) )
             errors += 1
 
     for cp in cache.get_installed_pkgs():
         if not pindex.has_key(cp.name):
+            logger.error("Full Package List validation:\n"
+                         "additional package %s installed, that was not"
+                         " requested" % cp.name)
             elog.printo( "additional package %s installed, that was not requested" % cp.name )
             errors += 1
 
     if errors == 0:
+        logger.info("Full Package List validation:\n"
+                    "No Error found")
         elog.printo( "No Errors found" )
 
 def elbe_report( xml, buildenv, cache, reportname, targetfs ):
