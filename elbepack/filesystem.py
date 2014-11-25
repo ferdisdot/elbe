@@ -19,6 +19,7 @@
 
 import os
 import shutil
+import logging
 
 from glob import glob
 from tempfile import mkdtemp
