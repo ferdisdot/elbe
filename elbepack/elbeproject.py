@@ -88,7 +88,9 @@ class ElbeProject (object):
         import logging
         rootlogger = logging.getLogger()
         rootlogger.setLevel(0)
-        rootlogger.addHandler(logging.StreamHandler())
+        stdoutHandler = logging.StreamHandler()
+        stdoutHandler.setLevel('WARNING')
+        rootlogger.addHandler(stdoutHandler)
 
         if logpath:
             self.log = ASCIIDocLog( logpath )
