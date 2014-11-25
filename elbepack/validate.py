@@ -34,10 +34,16 @@ def validate_xml(fname):
         if schema.validate(xml):
             return True
     except etree.XMLSyntaxError:
+        import logging
+        logger = logging.getLogger(__name__)
+        leffer.exception( "XML Parse error")
         print "XML Parse error"
         print str(sys.exc_info()[1])
         return False
     except:
+        import logging
+        logger = logging.getLogger(__name__)
+        leffer.exception( "Unknown Exception during validation")
         print "Unknown Exception during validation"
         print sys.exc_info()[1]
         return False

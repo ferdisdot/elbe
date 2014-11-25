@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with ELBE.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
 from elbepack.asciidoclog import ASCIIDocLog
 from datetime import datetime
 from elbepack.finetuning import do_finetuning
@@ -47,6 +49,8 @@ def dump_fullpkgs( xml, rfs, cache ):
         prefs = rfs.read_file("etc/apt/preferences")
         preferences.set_text(prefs)
     except IOError:
+        logger = logging.getLogger(__name__)
+        logger.exception('Error handling preferences')
         pass
 
 def dump_debootstrappkgs( xml, cache ):
@@ -159,6 +163,8 @@ def elbe_report( xml, buildenv, cache, reportname, targetfs ):
     try:
         prefs = rfs.read_file("etc/apt/preferences")
     except IOError:
+        logger = logging.getLogger(__name__)
+        logger.exception('could not read apt-preferences')
         prefs = ""
 
     outf.h2( "Apt Preferences dump" )

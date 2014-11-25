@@ -19,6 +19,7 @@
 from elbepack.shellhelper import CommandError, command_out
 import os
 import gpgme
+import logging
 
 from apt.package import FetchError
 from shutil import rmtree
@@ -354,6 +355,10 @@ def do_finetuning(xml, log, buildenv, target):
             action = FinetuningAction( i )
             action.execute(log, buildenv, target)
         except KeyError:
+            logger = logging.getLogger(__name__)
+            logger.error("Unimplemented finetuning action '%s'" % i.et.tag)
             print "Unimplemented finetuning action " + i.et.tag
         except CommandError:
+            logger = logging.getLogger(__name__)
+            logger.info("Finetuning Error, trying to continue anyways")
             log.printo( "Finetuning Error, trying to continue anyways" )

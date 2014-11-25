@@ -28,6 +28,14 @@ try:
     from apt_pkg import TagFile
     virtapt_imported = True
 except ImportError:
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning(
+        "WARNING - python-apt not available: if there are multiple versions of"
+        " kinitrd packages on the mirror(s) elbe selects the first package it"
+        " has found. There is no guarantee that the latest package is used."
+        " To ensure this, the python-apt package needs to be installed."
+    )
     print "WARNING - python-apt not available: if there are multiple versions of"
     print " kinitrd packages on the mirror(s) elbe selects the first package it"
     print " has found. There is no guarantee that the latest package is used."

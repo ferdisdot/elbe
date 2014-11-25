@@ -139,7 +139,7 @@ class ElbeProject (object):
             self.buildenv.rfs.dump_elbeversion (self.xml)
         except IOError:
             self.log.printo ("dump elbeversion failed")
-            logger.error("dump elbeversion failed")
+            logger.exception("dump elbeversion failed")
 
         # Extract target FS. We always create a new instance here with
         # clean=true, because we want a pristine directory.
@@ -172,7 +172,7 @@ class ElbeProject (object):
             self.targetfs.dump_elbeversion( self.xml )
         except MemoryError:
             self.log.printo( "dump elbeversion failed" )
-            logger.error("dump elbeversion failed")
+            logger.exception("dump elbeversion failed")
 
         # install packages for buildenv
         if not skip_pkglist:
@@ -184,6 +184,7 @@ class ElbeProject (object):
             sourcexmlpath = os.path.join( self.builddir, "source.xml" )
             self.xml.xml.write( sourcexmlpath )
         except MemoryError:
+            logger.exception("write source.xml failed (archive to huge?)")
             self.log.printo( "write source.xml failed (archive to huge?)" )
 
         # Elbe report
@@ -331,6 +332,8 @@ class ElbeProject (object):
             try:
                 self.get_rpcaptcache().update()
             except:
+                logger = logging.getLogger(__name__)
+                logger.exception('update cache failed.')
                 self.log.printo( "update cache failed" )
 
             # Then dump the debootstrap packages
@@ -345,12 +348,21 @@ class ElbeProject (object):
                             skip_validate=self.skip_validate )
                     self.xml.get_initvmnode_from( initxml )
                 except ValidationError:
+                    logger = logging.getLogger(__name__)
+                    logger.exception("/var/cache/elbe/source.xml validation failed\n"
+                                     "will not copy initvm node" )
                     self.log.printo( "/var/cache/elbe/source.xml validation failed" )
                     self.log.printo( "will not copy initvm node" )
                 except IOError:
+                    logger = logging.getLogger(__name__)
+                    logger.exception("/var/cache/elbe/source.xml not available\n"
+                                     "can not copy initvm node" )
                     self.log.printo( "/var/cache/elbe/source.xml not available" )
                     self.log.printo( "can not copy initvm node" )
                 except NoInitvmNode:
+                    logger = logging.getLogger(__name__)
+                    logger.exception("/var/cache/elbe/source.xml is available\n"
+                                     "But it does not contain an initvm node" )
                     self.log.printo( "/var/cache/elbe/source.xml is available" )
                     self.log.printo( "But it does not contain an initvm node" )
             else:
@@ -363,6 +375,9 @@ class ElbeProject (object):
                 try:
                     self.xml.get_initvmnode_from( source )
                 except NoInitvmNode:
+                    logger = logging.getLogger(__name__)
+                    logger.exception("/var/cache/elbe/source.xml is available\n"
+                                     "But it does not contain an initvm node" )
                     self.log.printo( "source.xml is available" )
                     self.log.printo( "But it does not contain an initvm node" )
 
@@ -385,8 +400,12 @@ class ElbeProject (object):
                 try:
                     self.get_rpcaptcache().mark_install( p, None )
                 except KeyError:
+                    logger = logging.getLogger(__name__)
+                    logger.exception("No Package %s" % p)
                     self.log.printo( "No Package " + p )
                 except SystemError:
+                    logger = logging.getLogger(__name__)
+                    logger.exception("Unable to correct problems %s" % p)
                     self.log.printo( "Unable to correct problems " + p )
 
             # temporary disabled because of
@@ -397,4 +416,6 @@ class ElbeProject (object):
             try:
                 self.get_rpcaptcache().commit()
             except SystemError:
+                logger = logging.getLogger(__name__)
+                logger.exception("commiting changes failed")
                 self.log.printo( "commiting changes failed" )
